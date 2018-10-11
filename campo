@@ -1,0 +1,98 @@
+#Desenvolvido por Gabriel Camargo[Senac Jogos Digitais]
+from visual import *
+from visual.controls import *
+
+controlScene = -1
+colidiu = False
+
+def setmode(mode):
+    global controlScene
+    global colidiu
+    #GOL
+    if mode == 0:
+        ball.pos.x = 10
+        ball.pos.y = 1
+        ball.pos.z = 0
+        ball.velocity = vector(-45,7,0)
+        controlScene = 0
+
+    #Travessao
+    if mode == 1:
+        ball.pos.x = 10
+        ball.pos.y = 1
+        ball.pos.z = 0
+        ball.velocity = vector(-45,10,0)
+        controlScene = 1
+
+    #Trave
+    if mode == 2:
+        ball.pos.x = 10
+        ball.pos.y = 1
+        ball.pos.z = 0
+        ball.velocity = vector(-45,7,0)
+        controlScene = 2
+        colidiu = False
+
+#Criação de Objetos
+ball = sphere(pos = vector(10,1,0),color=color.white, radius = 1)
+campo = box(pos = vector(0, 0, 0), color = color.green, length = 120, height = 0.1, width = 90)
+
+#Criação do Gol
+#-Traves(Beam and Cross)
+beam_left_front = cylinder(pos = vector(-50, 0, 10), axis = vector(0.1, 10, 0.1), radius = 0.3)
+beam_right_front = cylinder(pos = vector(-50, 0, -10), axis = vector(0.1, 10, 0.1), radius = 0.3)
+cross = cylinder(pos = vector(-50, 10, -10.1), axis = vector(0.1, 0.1, 20.2), radius = 0.3)
+
+#Botoes
+w = 350 #Tamanho
+display(x=150, y=0, width=w, height=w, range=1.5, forward=-vector(0,1,1))
+c = controls(x=0, y=0, width=w, height=w, range=60)
+
+bl = button(pos=(-30,30), height=30, width=40, text='Gol', action=lambda: setmode(0))
+b2 = button(pos=(-30,0), height=30, width=40, text='Travessao', action=lambda: setmode(1))
+b3 = button(pos=(-30,-30), height=30, width=40, text='Trave', action=lambda: setmode(2))
+
+
+#Variaveis de Utilidade
+#gravity = vector(0,-9.8,0)
+ball.velocity = vector(-45,10,0)
+t = 0
+dt = 0.001	
+FRAME = 1/dt
+
+
+
+while True:
+    #Frames
+    rate(FRAME)
+    
+    #Gravidade Nunca Sair.(Força Constante)
+    if ball.y < 1:
+        ball.velocity.y = -ball.velocity.y
+    else:
+        ball.velocity.y = ball.velocity.y - 9.8*dt
+
+    #Bola para o GOL
+    if controlScene == 0:
+        ball.pos += ball.velocity * dt
+        ball.pos.y += ball.velocity.y * dt
+
+    #Bola para Travessao
+    if controlScene == 1:
+        if ball.pos.x + 1 > cross.pos.x and ball.pos.x - 1 < cross.pos.x:
+            if ball.pos.y + 1 > cross.pos.y and ball.pos.y - 1 < cross.pos.y:
+                ball.velocity.x = -ball.velocity.x
+        ball.pos += ball.velocity * dt
+        ball.pos.y += ball.velocity.y * dt
+
+    #Trave
+    if controlScene == 2:
+        if ball.pos.x < beam_left_front.pos.x:
+            colidiu = True
+        if colidiu == True:
+            ball.pos -= beam_left_front.pos * dt
+        else:
+            ball.pos += beam_left_front.pos* dt 
+        ball.pos.y += ball.velocity.y * dt
+
+    
